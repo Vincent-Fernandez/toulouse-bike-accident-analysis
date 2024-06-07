@@ -53,10 +53,8 @@ def create_folium_map(df, geojson_data, center, zoom_start=12):
 
 # Function to create pie chart
 def create_pie_chart(data, column, title):
-
-    data_counts = df[column].value_counts().reset_index()
+    data_counts = data[column].value_counts().reset_index()
     data_counts.columns = [column, 'count']
-
     fig = px.pie(
         data_counts,
         values='count',
@@ -69,10 +67,8 @@ def create_pie_chart(data, column, title):
 
 
 def create_bar_chart(data, column, title):
-
-    data_counts = df[column].value_counts().reset_index()
+    data_counts = data[column].value_counts().reset_index()
     data_counts.columns = [column, 'count']
-
     fig = px.bar(
         data_counts,
         x=column,
@@ -85,16 +81,13 @@ def create_bar_chart(data, column, title):
         title=title
     )
     fig.update_layout(title={'x': 0.5, 'xanchor': 'center'}, showlegend=False)
-
     st.plotly_chart(fig, use_container_width=True)
 
 
 def create_line_chart(data, column, title):
-    data_counts = df[column].value_counts().reset_index()
+    data_counts = data[column].value_counts().reset_index()
     data_counts.columns = [column, 'count']
-
     data_counts = data_counts.sort_values(by=column)
-
     fig = px.line(
         data_counts,
         x=column,
@@ -110,7 +103,7 @@ def create_line_chart(data, column, title):
 
 
 # Load data
-csv_path = '/Users/vincent/Downloads/Fichiers projet/streamlit/accidents-velo-31-clean.csv'
+csv_path = './accidents-velo-31-clean.csv'
 geojson_path = 'streamlit/filtered_france_tls_20240601.geojson'
 df, geojson_data = load_data(csv_path, geojson_path)
 df['date_heure'] = pd.to_datetime(
@@ -133,98 +126,74 @@ st.markdown("""
     """, unsafe_allow_html=True)
 folium_static(mymap, width=1300, height=700)
 
-
 # Tabs for additional visualizations
-
-tab5, tab6, tab7, tab8 = st.tabs(
-    ['Année',
-     'Mois',
-     'Jour',
-     'Heure'],
-
-)
-
+tab5, tab6, tab7, tab8 = st.tabs(['Année', 'Mois', 'Jour', 'Heure'])
 
 with tab5:
-    # line chart of accidents by year
     df['year'] = df['date_heure'].dt.year
     create_line_chart(df, 'year', 'Nombre d\'accidents par année')
 
-
 with tab6:
-    # line chart of accidents by month
     df['month'] = df['date_heure'].dt.month
     create_line_chart(df, 'month', 'Nombre d\'accidents par mois')
 
-
 with tab7:
-    # line chart of accidents by day
     df['day'] = df['date_heure'].dt.day
     create_line_chart(df, 'day', 'Nombre d\'accidents par jour')
 
-
 with tab8:
-    # line chart of accidents by hour
     df['hour'] = df['date_heure'].dt.hour
-    create_line_chart(df, 'heure', 'Nombre d\'accidents par heure')
+    create_line_chart(df, 'hour', 'Nombre d\'accidents par heure')
 
-tab1, tab2, tab3, tab4 = st.tabs(
-    ['Situation',
-     'Gravité',
-     'Route',
-     'Collision'],
-)
-
+tab1, tab2, tab3, tab4 = st.tabs(['Situation', 'Gravité', 'Route', 'Collision'])
 
 with tab1:
     col1, col2, col3 = st.columns(3)
     with col1:
         create_pie_chart(df, 'agglomeration', 'Accidents par zone de circulation')
-
     with col2:
         create_pie_chart(df, 'meteo', 'Accidents par météo')
-
     with col3:
-        df['éclairage'] = df['éclairage'].replace('Nuit avec éclairage public allumé', 'Nuit avec éclairage')
-        df['éclairage'] = df['éclairage'].replace('Nuit sans éclairage public', 'Nuit sans éclairage')
-        df['éclairage'] = df['éclairage'].replace('Nuit avec éclairage public non allumé', 'Nuit sans éclairage')
+        df['éclairage'] = df['éclairage'].replace({
+            'Nuit avec éclairage public allumé': 'Nuit avec éclairage',
+            'Nuit sans éclairage public': 'Nuit sans éclairage',
+            'Nuit avec éclairage public non allumé': 'Nuit sans éclairage'
+        })
         create_pie_chart(df, 'éclairage', 'Accidents par luminosité')
 
 with tab2:
     col1, col2, col3 = st.columns(3)
-
     with col1:
         create_pie_chart(df, 'gravite', 'Accidents par gravité')
-
     with col2:
         df_filtered = df[df['sexe'] != 'Non renseigné']
         severity_by_age_group = df_filtered.groupby('sexe')['gravite'].value_counts().unstack().reset_index()
-
-        fig = px.bar(severity_by_age_group,
-                     x='sexe',
-                     y=['Indemne', 'Blessé léger', 'Blessé hospitalisé', 'Tué'],
-                     title='Gravité des accidents par sexe',
-                     labels={'value': 'Nombre d\'accidents', 'sexe': 'Sexe'},
-                     text_auto=True)
+        fig = px.bar(
+            severity_by_age_group,
+            x='sexe',
+            y=['Indemne', 'Blessé léger', 'Blessé hospitalisé', 'Tué'],
+            title='Gravité des accidents par sexe',
+            labels={'value': 'Nombre d\'accidents', 'sexe': 'Sexe'},
+            text_auto=True
+        )
         fig.update_layout(title={'x': 0.5, 'xanchor': 'center'})
         st.plotly_chart(fig, use_container_width=True)
-
     with col3:
         bins = [0, 18, 30, 40, 50, 60, 70, 80, 90, 100]
         labels = ['0-18', '19-30', '31-40', '41-50', '51-60', '61-70', '71-80', '81-90', '91-100']
         df['age_group'] = pd.cut(df['age'], bins=bins, labels=labels, right=False)
         severity_by_age_group = df.groupby('age_group')['gravite'].value_counts().unstack().reset_index()
-
-        fig = px.bar(severity_by_age_group,
-                     x='age_group',
-                     y=['Indemne', 'Blessé léger', 'Blessé hospitalisé', 'Tué'],
-                     title='Gravité des accidents par tranches d\'âges',
-                     labels={'value': 'Nombre d\'accidents', 'age_group': 'Tranches d\'âges'},
-                     text_auto=True)
+        fig = px.bar(
+            severity_by_age_group,
+            x='age_group',
+            y=['Indemne', 'Blessé léger', 'Blessé hospitalisé', 'Tué'],
+            title='Gravité des accidents par tranches d\'âges',
+            labels={'value': 'Nombre d\'accidents', 'age_group': 'Tranches d\'âges'},
+            text_auto=True
+        )
         fig.update_layout(title={'x': 0.5, 'xanchor': 'center'}, showlegend=False)
-        fig.update_xaxes(categoryarray=labels, )
+        fig.update_xaxes(categoryarray=labels)
         st.plotly_chart(fig, use_container_width=True)
-
 
 with tab3:
     col1, col2, col3 = st.columns(3)
@@ -233,23 +202,22 @@ with tab3:
     with col2:
         create_pie_chart(df, 'voie_speciale', 'Présence de voie spéciale pour vélo')
     with col3:
-        # transform 'Intersection à plus de 4 branches' en 'Plus de 4 branches'
         df['intersection'] = df['intersection'].replace('Intersection à plus de 4 branches', 'Plus de 4 branches')
         create_pie_chart(df_filtered, 'intersection', 'Accidents par type d\'intersection')
-
 
 with tab4:
     col1, col2 = st.columns(2)
     with col1:
         create_pie_chart(df, 'collision', 'Accidents par type de collision')
     with col2:
-        # gravité des accidents par type de collision
         severity_by_collision = df.groupby('collision')['gravite'].value_counts().unstack().reset_index()
-        fig = px.bar(severity_by_collision,
-                     x='collision',
-                     y=['Indemne', 'Blessé léger', 'Blessé hospitalisé', 'Tué'],
-                     title='Gravité des accidents par type de collision',
-                     labels={'value': 'Nombre d\'accidents', 'collision': 'Type de collision'},
-                     text_auto=True)
+        fig = px.bar(
+            severity_by_collision,
+            x='collision',
+            y=['Indemne', 'Blessé léger', 'Blessé hospitalisé', 'Tué'],
+            title='Gravité des accidents par type de collision',
+            labels={'value': 'Nombre d\'accidents', 'collision': 'Type de collision'},
+            text_auto=True
+        )
         fig.update_layout(title={'x': 0.5, 'xanchor': 'center'})
         st.plotly_chart(fig, use_container_width=True)
