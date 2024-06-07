@@ -104,7 +104,7 @@ def create_line_chart(data, column, title):
 
 # Load data
 csv_path = './accidents-velo-31-clean.csv'
-geojson_path = 'streamlit/filtered_france_tls_20240601.geojson'
+geojson_path = './filtered_france_tls_20240601.geojson'
 df, geojson_data = load_data(csv_path, geojson_path)
 df['date_heure'] = pd.to_datetime(
     df['annee'].astype(str) + '-' +
