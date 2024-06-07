@@ -120,11 +120,15 @@ mymap = create_folium_map(df, geojson_data, map_center)
 # Streamlit title and map display
 st.markdown("""
     <div style="text-align: center;">
-        <h1>Carte des accidents en vélo à Toulouse</h1>
+        <h1>Toulouse : carte des accidents de vélo</h1>
         <p>Cette carte montre les accidents de vélo à Toulouse ainsi que les pistes cyclables.</p>
     </div>
     """, unsafe_allow_html=True)
-folium_static(mymap, width=1300, height=700)
+
+# Centering the map
+col1, col2, col3 = st.columns([1, 6, 1])
+with col2:
+    folium_static(mymap, width=1000, height=700)
 
 # Tabs for additional visualizations
 tab5, tab6, tab7, tab8 = st.tabs(['Année', 'Mois', 'Jour', 'Heure'])
