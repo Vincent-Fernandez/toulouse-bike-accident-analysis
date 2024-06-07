@@ -23,7 +23,7 @@ def load_data(csv_path, geojson_path):
 # Function to create folium map
 def create_folium_map(df, geojson_data, center, zoom_start=12):
     mymap = folium.Map(location=center, zoom_start=zoom_start)
-    folium.GeoJson(geojson_data, name='Pistes Cyclables').add_to(mymap)
+    folium.GeoJson(geojson_data, name='Pistes Cyclables', show=False).add_to(mymap)
     folium.TileLayer('openstreetmap').add_to(mymap)
     marker_cluster = MarkerCluster().add_to(mymap)
     for accident in df.itertuples(index=False):
