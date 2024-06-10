@@ -163,6 +163,7 @@ with tab1:
             'Nuit sans éclairage public': 'Nuit sans éclairage',
             'Nuit avec éclairage public non allumé': 'Nuit sans éclairage'
         })
+        df['intersection'] = df['intersection'].replace('Intersection à plus de 4 branches', 'Plus de 4 branches')
         create_pie_chart(df, 'éclairage', 'Accidents par luminosité')
 
 with tab2:
