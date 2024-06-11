@@ -131,7 +131,7 @@ with col2:
     folium_static(mymap, width=1000, height=700)
 
 # Tabs for additional visualizations
-tab5, tab6, tab7, tab8 = st.tabs(['Année', 'Mois', 'Jour', 'Heure'])
+tab5, tab6, tab7, tab8, tab9 = st.tabs(['Année', 'Mois', 'Jour/mois', 'Jour/semaine', 'Heure'])
 
 with tab5:
     df['year'] = df['date_heure'].dt.year
@@ -146,6 +146,21 @@ with tab7:
     create_line_chart(df, 'day', 'Nombre d\'accidents par jour')
 
 with tab8:
+    df['dayofweek'] = df['date_heure'].dt.dayofweek
+    df['dayofweek'] = df['dayofweek'].replace({
+        0: 'Lundi',
+        1: 'Mardi',
+        2: 'Mercredi',
+        3: 'Jeudi',
+        4: 'Vendredi',
+        5: 'Samedi',
+        6: 'Dimanche'
+    })
+    df['dayofweek'] = pd.Categorical(df['dayofweek'], categories=[
+        'Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'], ordered=True)
+    create_line_chart(df, 'dayofweek', 'Nombre d\'accidents par jour de la semaine')
+
+with tab9:
     df['hour'] = df['date_heure'].dt.hour
     create_line_chart(df, 'hour', 'Nombre d\'accidents par heure')
 
