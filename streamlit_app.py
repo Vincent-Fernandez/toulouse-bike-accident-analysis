@@ -99,8 +99,7 @@ def create_line_chart(data, column, title):
     )
     fig.update_traces(textposition='top center')
     fig.update_layout(title={'x': 0.5, 'xanchor': 'center'},
-                      xaxis=dict(tickmode='linear'),
-                      yaxis=dict(range=[0, data_counts['count'].max() + 1]))
+                      xaxis=dict(tickmode='linear'))
     st.plotly_chart(fig, use_container_width=True)
 
 
